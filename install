@@ -5,5 +5,7 @@ if [ $EUID -ne 0 ]
   exit
 fi
 
+cd src
+g++ -o b++ main.cpp
 mv b++ /usr/bin/
 echo "alias b++=./b++" >> ~/.bashrc
