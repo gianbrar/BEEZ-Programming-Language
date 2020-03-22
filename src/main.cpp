@@ -1,10 +1,6 @@
-#include <fstream>
-#include <boost/algorithm/string.hpp>
-#include <iostream>
-#include <string>
-#ifndef ERR
 #define ERR cout << "ERROR: " <<
-#endif
+#define MAIN_CPP
+#include "libraries.hpp"
 using std::cout;
 using std::endl;
 bool hive = false;
@@ -18,15 +14,12 @@ int createHive() {
   return 0;
 }
 
+char** removeSpace(std::string ogString) {
+  return ogString.substr(std::remove_if(ogString.begin(), ogString.end(), ::isspace), ogString.end());
+}
+
 int main(int argc, char** argv) {
-  std::string fileName;
-  if (argc == 0) {
-    cout << "Please enter name of file." << endl;
-    std::getline(std::cin, fileName);
-  }
-  else {
-    fileName = argv[1];
-  }
+  std::string fileName = argv[1];
   if (boost::algorithm::ends_with(fileName, ".BUZZ") == false) {
     if (boost::algorithm::iends_with(fileName, ".BUZZ") == true) {
       fileName.erase(fileName.length() - 5, fileName.length());
@@ -52,6 +45,24 @@ int main(int argc, char** argv) {
       else {
         ERR "Hive type already declared." << endl;
         return 0;
+      }
+    }
+    if (interpret.substr(0, 4) == "BUZZ") {
+      interpret.erase(0, 4);
+      std::string varCheck = removeSpace(interpret);
+      if (varCheck.at(0) == '(') {
+        if (varCheck.find(',') != string::npos) {
+          std::string functionArgs[];
+          int varCheckFindI = 0;
+          while (varCheck.find(',') != string::npos) {
+            functionArgs[varCheckFindI] = varCheck.substr(varCheck.find(',') + 1, ;
+            varCheckFindI += 1;
+          }
+          function uFunc(varCheck.substr(1, commaF - 1), functionArgs);
+        }
+        else {
+          function uFunc(varCheck.substr(1, commaF - 1));
+        }  
       }
     }
   }
