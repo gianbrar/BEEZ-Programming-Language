@@ -18,10 +18,15 @@ int createHive() {
   return 0;
 }
 
-int main() {
+int main(int argc, char** argv) {
   std::string fileName;
-  cout << "Please enter name of file." << endl;
-  std::getline(std::cin, fileName);
+  if (argc == 0) {
+    cout << "Please enter name of file." << endl;
+    std::getline(std::cin, fileName);
+  }
+  else {
+    fileName = argv[1];
+  }
   if (boost::algorithm::ends_with(fileName, ".BUZZ") == false) {
     if (boost::algorithm::iends_with(fileName, ".BUZZ") == true) {
       fileName.erase(fileName.length() - 5, fileName.length());
