@@ -1,2 +1,9 @@
 #!/bin/bash
 
+if [ $EUID -ne 0 ]
+  then echo 'Please run as sudo.'
+  exit
+fi
+
+mv b++ /usr/bin/
+echo "alias b++=./b++" >> ~/.bashrc
