@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
   }
   std::ifstream buzzFile(fileName.c_str());
   if (!buzzFile) {
-    ERR "File does not exist!" << endl;
+    ERR "File " << "'" << fileName << "' does not exist!" << endl;
     return 0;
   }
   while (getline(buzzFile, interpret)) {
