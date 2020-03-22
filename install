@@ -8,6 +8,6 @@ fi
 cd src
 g++ -o b++ main.cpp
 mv b++ /usr/bin/
-alias b++='/usr/bin/b++'
-echo "alias b++='/usr/bin/b++''" >> ~/.bashrc
+alias b++=/usr/bin/b++
+echo "alias b++=/usr/bin/b++" >> ~/.bashrc
 echo "Install successful!"
