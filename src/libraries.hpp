@@ -1,7 +1,8 @@
 #include <fstream>
 #include <boost/algorithim/string.hpp>
+#include <boost/algorithm/string/find.hpp>
 #include <iostream>
 #include <string>
-#ifdef MAIN_CPP
+#ifdef FUNC_NOT
 #include "function.hpp"
 #endif
