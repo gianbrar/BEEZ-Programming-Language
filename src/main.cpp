@@ -1,4 +1,5 @@
 #define ERR cout << "ERROR: " <<
+#define WARN cout << "WARNING: " <<
 #define MAIN_CPP
 #include "libraries.hpp"
 using std::cout;
@@ -14,8 +15,21 @@ int createHive() {
   return 0;
 }
 
-char** removeSpace(std::string ogString) {
-  return ogString.substr(std::remove_if(ogString.begin(), ogString.end(), ::isspace), ogString.end());
+char** removeCS(std::string ogString, char CS) {
+  if (CS == 'C') {
+    newOG = ogString;
+    newOG.erase(newOG.find("?"));
+    return newOG;
+  }
+  else if (CS == 'S') {
+    std::string newOg = ogString;
+    newOG.erase(std::remove_if(newOG.begin(), newOG.end(), ::isspace), newOG.end());
+    return newOG;
+  }
+  else {
+    WARN "Compilation error; char CS defined incorrectly in char** removeCS(std::string ogString, char CS)" << endl;
+    return "";
+  }
 }
 
 int main(int argc, char** argv) {
@@ -38,7 +52,7 @@ int main(int argc, char** argv) {
           createHive();
         }
         else {
-          ERR "Cannot declare hive type inside of function!" << endl;
+          ERR "Cannot declare hive type inside of function." << endl;
           return 0;
         }
       }
@@ -47,21 +61,36 @@ int main(int argc, char** argv) {
         return 0;
       }
     }
-    if (interpret.substr(0, 4) == "BUZZ") {
+    if (interpret.substr(0, 3) == "BUZZ") {
       interpret.erase(0, 4);
-      std::string varCheck = removeSpace(interpret);
+      std::string varCheck = removeCS(removeCS(interpret, 'S'), 'C');
       if (varCheck.at(0) == '(') {
         if (varCheck.find(',') != string::npos) {
           std::string functionArgs[];
           int varCheckFindI = 0;
           while (varCheck.find(',') != string::npos) {
-            functionArgs[varCheckFindI] = varCheck.substr(varCheck.find(',') + 1, ;
+            secondVarCheckFind = std::distance(varCheck.substr(varCheck.find(',') + 1), boost::algorithm::string::find_nth(varCheck, ',', 2))
+            if (secondVarCheckFind != 0) {
+              functionArgs[varCheckFindI] = varCheck.substr(varCheck.find(',') + 1, secondVarCheckFind);
+            }
+            else {
+              functionArgs[varCheckFindI] = varCheck.substr(varCheck.find(','), varCheck.find_last_of(")"))
+            }
             varCheckFindI += 1;
           }
           function uFunc(varCheck.substr(1, commaF - 1), functionArgs);
         }
         else {
           function uFunc(varCheck.substr(1, commaF - 1));
+        }
+        if (varCheck.back() == '{') {
+          inFunction = true
+        }
+        else if (varCheck.back() == '}') {
+          uFunc.contents = interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1);
+        }
+        else {
+          WARN "Function declared without brackets." << endl;
         }  
       }
     }
