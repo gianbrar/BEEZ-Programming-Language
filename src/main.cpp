@@ -1,7 +1,7 @@
 #define ERR cout << "ERROR: " <<
-#define WARN cout << "WARNING: " <<
-#define MAIN_CPP
+#define WARN cout << "WARNING: I am going to die. Nice job, you honeyhog. Also: " << 
 #include "libraries.hpp"
+#include "function.hpp"
 using std::cout;
 using std::endl;
 bool hive = false;
@@ -15,21 +15,21 @@ int createHive() {
   return 0;
 }
 
-char** removeCS(std::string ogString, char CS) {
+std::string removeCS(std::string ogString, char CS) {
+  std::string newOG;
   if (CS == 'C') {
     newOG = ogString;
     newOG.erase(newOG.find("?"));
-    return newOG;
   }
   else if (CS == 'S') {
-    std::string newOg = ogString;
+    newOG = ogString;
     newOG.erase(std::remove_if(newOG.begin(), newOG.end(), ::isspace), newOG.end());
-    return newOG;
   }
   else {
     WARN "Compilation error; char CS defined incorrectly in char** removeCS(std::string ogString, char CS)" << endl;
-    return "";
+    return "0";
   }
+  return newOG;
 }
 
 int main(int argc, char** argv) {
@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
   }
   std::ifstream buzzFile(fileName.c_str());
   if (!buzzFile) {
-    ERR "File " << "'" << fileName << "' does not exist!" << endl;
+    ERR "File " << "'" << fileName << "' does not exisRt!" << endl;
     return 0;
   }
   while (getline(buzzFile, interpret)) {
@@ -65,26 +65,27 @@ int main(int argc, char** argv) {
       interpret.erase(0, 4);
       std::string varCheck = removeCS(removeCS(interpret, 'S'), 'C');
       if (varCheck.at(0) == '(') {
-        if (varCheck.find(',') != string::npos) {
-          std::string functionArgs[];
-          int varCheckFindI = 0;
-          while (varCheck.find(',') != string::npos) {
-            secondVarCheckFind = std::distance(varCheck.substr(varCheck.find(',') + 1), boost::algorithm::string::find_nth(varCheck, ',', 2))
+        if (varCheck.find(',') != std::string::npos) {
+          int secondVarCheckFind;
+          std::vector<std::string> functionArgs;
+          while (varCheck.find(',') != std::string::npos) {
+            secondVarCheckFind = std::distance(varCheck.substr(varCheck.find(',') + 1), boost::find_nth(varCheck, ',', 2))
             if (secondVarCheckFind != 0) {
-              functionArgs[varCheckFindI] = varCheck.substr(varCheck.find(',') + 1, secondVarCheckFind);
+              functionArgs.push_back(varCheck.substr(varCheck.find(',') + 1, secondVarCheckFind));
             }
             else {
-              functionArgs[varCheckFindI] = varCheck.substr(varCheck.find(','), varCheck.find_last_of(")"))
+              functionArgs.push_back(varCheck.substr(varCheck.find(','), varCheck.find_last_of(")")))
             }
-            varCheckFindI += 1;
           }
+          int commaF = varCheck.find(',');
           function uFunc(varCheck.substr(1, commaF - 1), functionArgs);
         }
         else {
+          int commaF = varCheck.find(',');
           function uFunc(varCheck.substr(1, commaF - 1));
         }
         if (varCheck.back() == '{') {
-          inFunction = true
+          inFunction = true;
         }
         else if (varCheck.back() == '}') {
           uFunc.contents = interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1);
@@ -97,3 +98,4 @@ int main(int argc, char** argv) {
   }
   return 0;
 }
+

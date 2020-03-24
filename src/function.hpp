@@ -1,14 +1,13 @@
-#define FUNC_NOT
 #include "libraries.hpp"
 
 class function {
   public:
-    std::string args[];
+    std::vector<std::string> args;
     std::string name;
     std::string contents;
-    function(std::string arrayFuncName, std::string givenArgs[]) {
+    function(std::string arrayFuncName, std::vector<std::string> givenArgs) : name(arrayFuncName) {
       for (int i = 0; i < givenArgs.size(); i++) {
-        args[i] = givenArgs[i];
+        args.push_back(givenArgs.at(i));
       }
     }
     function (std::string funcName) : name(funcName) {}
