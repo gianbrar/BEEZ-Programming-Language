@@ -6,6 +6,7 @@ using std::cout;
 using std::endl;
 bool hive = false;
 bool inFunction = false;
+bool debugMode = false;
 std::string interpret;
 std::string hiveType;
 function uFunc;
@@ -35,10 +36,17 @@ std::string removeCS(std::string ogString, char CS) {
 
 int main(int argc, char** argv) {
   std::string fileName;
+  std::string secondary;
   bool possibleCommand = false;
   if (argc > 1) {
       fileName = argv[1];
-  }
+      if (argc > 2) {
+        secondary = argv[2];
+        if (secondary == "-d" || secondary == "-debug") {
+          debugMode = true;
+        }
+      }
+    }
   else {
       ERR "No input files given." << endl;
       return 0;
@@ -50,10 +58,9 @@ int main(int argc, char** argv) {
   if (argv1.at(0) == '-') {
     possibleCommand = true;
     if (fileName == "-m" || fileName == "-man") {
-      cout << "Welcome to b++, an interpreter created for the BEEZ Programming Language.\nGENERAL STRUCTURE OF COMMAND: b++ {file name or optional command here} {secondary optional command here}\nOPTIONAL COMMANDS: b++ -m or b++ -man: Brings up this help page." << endl;
+      cout << "Welcome to b++, an interpreter created for the BEEZ Programming Language.\nGENERAL STRUCTURE OF COMMAND:\nb++ {file name or optional command here} {secondary optional command here}\nOPTIONAL COMMANDS:\nb++ -m or b++ -man: Brings up this help page.\nb++ {file name} -d or b++ {file name} -debug: Runs file in debug mode. (for compiler maintainers)" << endl;
       return 0;
     }
-    else if (fileName == "-s" || fileName == "-settings")
   }
   if (boost::algorithm::ends_with(fileName, ".BUZZ") == false) {
     if (boost::algorithm::iends_with(fileName, ".BUZZ") == true) {
