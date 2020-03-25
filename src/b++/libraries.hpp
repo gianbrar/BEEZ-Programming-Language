@@ -6,3 +6,5 @@
 #include <iterator>
 #include <cstddef>
 #include <string>
+#include <sstream>
+#pragma once

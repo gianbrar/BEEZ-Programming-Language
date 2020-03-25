@@ -11,4 +11,5 @@ class function {
       }
     }
     function (std::string funcName) : name(funcName) {}
+    function () {}
 };
