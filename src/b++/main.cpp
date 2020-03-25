@@ -8,6 +8,7 @@ bool hive = false;
 bool inFunction = false;
 std::string interpret;
 std::string hiveType;
+function uFunc;
 
 int createHive() {
   hive = true;
@@ -42,11 +43,12 @@ int main(int argc, char** argv) {
   }
   std::ifstream buzzFile(fileName.c_str());
   if (!buzzFile) {
-    ERR "File " << "'" << fileName << "' does not exisRt!" << endl;
+    ERR "File '" << fileName << "' does not exist!" << endl;
     return 0;
   }
   while (getline(buzzFile, interpret)) {
-    if (interpret.at(0) == '^') {
+    std::string varCheck = removeCS(removeCS(interpret, 'S'), 'C');
+    if (varCheck.at(0) == '^') {
       if (hive == false) {
         if (inFunction == false) {
           createHive();
@@ -61,20 +63,27 @@ int main(int argc, char** argv) {
         return 0;
       }
     }
-    if (interpret.substr(0, 3) == "BUZZ") {
-      interpret.erase(0, 4);
-      std::string varCheck = removeCS(removeCS(interpret, 'S'), 'C');
+    if (varCheck.substr(0, 3) == "BUZZ") {
+      varCheck.erase(0, 3);
       if (varCheck.at(0) == '(') {
         if (varCheck.find(',') != std::string::npos) {
           int secondVarCheckFind;
+          int varCheckFindI = 1;
           std::vector<std::string> functionArgs;
           while (varCheck.find(',') != std::string::npos) {
-            secondVarCheckFind = std::distance(varCheck.substr(varCheck.find(',') + 1), boost::find_nth(varCheck, ',', 2))
+            varCheckFindI++;
+            boost::iterator_range<std::string::iterator> varCheckFindMultiComma = boost::find_nth(varCheck, ",", varCheckFindI);
+            char charVarCheckGoTo = varCheck.at(varCheck.find(','));
+            std::stringstream ssVarCheckGoTo;
+            ssVarCheckGoTo << charVarCheckGoTo;
+            std::string varCheckGoTo;
+            ssVarCheckGoTo >> varCheckGoTo;
+            secondVarCheckFind = std::distance(varCheckGoTo.begin(), varCheckFindMultiComma.begin());
             if (secondVarCheckFind != 0) {
               functionArgs.push_back(varCheck.substr(varCheck.find(',') + 1, secondVarCheckFind));
             }
             else {
-              functionArgs.push_back(varCheck.substr(varCheck.find(','), varCheck.find_last_of(")")))
+              functionArgs.push_back(varCheck.substr(varCheck.find(','), varCheck.find_last_of(")")));
             }
           }
           int commaF = varCheck.find(',');
@@ -91,7 +100,7 @@ int main(int argc, char** argv) {
           uFunc.contents = interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1);
         }
         else {
-          WARN "Function declared without brackets." << endl;
+          WARN "Function declared without curly brackets." << endl;
         }  
       }
     }

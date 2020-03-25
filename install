@@ -6,6 +6,7 @@ if [ $EUID -ne 0 ]
 fi
 
 cd src
+cd b++
 g++ -o b++ main.cpp
 mv b++ /usr/bin/
 alias b++=/usr/bin/b++
