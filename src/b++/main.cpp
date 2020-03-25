@@ -34,7 +34,14 @@ std::string removeCS(std::string ogString, char CS) {
 }
 
 int main(int argc, char** argv) {
-  std::string fileName = argv[1];
+  std::string fileName;
+  if (argc > 1) {
+      fileName = argv[1];
+  }
+  else {
+      ERR "No input files given." << endl;
+      return 0;
+  }
   if (boost::algorithm::ends_with(fileName, ".BUZZ") == false) {
     if (boost::algorithm::iends_with(fileName, ".BUZZ") == true) {
       fileName.erase(fileName.length() - 5, fileName.length());
