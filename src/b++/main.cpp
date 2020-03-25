@@ -1,5 +1,5 @@
 #define ERR cout << "ERROR: " <<
-#define WARN cout << "WARNING: I am going to die. Nice job, you honeyhog. Also: " << 
+#define WARN cout << "WARNING: " << 
 #include "libraries.hpp"
 #include "function.hpp"
 using std::cout;
@@ -35,12 +35,24 @@ std::string removeCS(std::string ogString, char CS) {
 
 int main(int argc, char** argv) {
   std::string fileName;
+  bool possibleCommand = false;
   if (argc > 1) {
       fileName = argv[1];
   }
   else {
       ERR "No input files given." << endl;
       return 0;
+  }
+  std::string argv1;
+  std::stringstream ssArgv1;
+  ssArgv1 << argv[1];
+  ssArgv1 >> argv1;
+  if (argv1.at(0) == '-') {
+    possibleCommand = true;
+    if (fileName == "-m" || fileName == "-man") {
+      cout << "Welcome to b++, an interpreter created for the BEEZ Programming Language.\nGENERAL STRUCTURE OF COMMAND: b++ {file name here} {optional command here}\nOPTIONAL COMMANDS: b++ -m or b++ -man: Brings up this help page." << endl;
+      return 0;
+    }
   }
   if (boost::algorithm::ends_with(fileName, ".BUZZ") == false) {
     if (boost::algorithm::iends_with(fileName, ".BUZZ") == true) {
@@ -51,10 +63,20 @@ int main(int argc, char** argv) {
   std::ifstream buzzFile(fileName.c_str());
   if (!buzzFile) {
     ERR "File '" << fileName << "' does not exist!" << endl;
+    if (possibleCommand == true) {
+      cout << "Did you mean to type in a command?" << endl;
+    }
+    return 0;
+  }
+  if (buzzFile.peek() == std::ifstream::traits_type::eof()) {
+    ERR "File is blank." << endl;
     return 0;
   }
   while (getline(buzzFile, interpret)) {
     std::string varCheck = removeCS(removeCS(interpret, 'S'), 'C');
+    if (varCheck == "") {
+      ERR "Input file is blank." << endl;
+    }
     if (varCheck.at(0) == '^') {
       if (hive == false) {
         if (inFunction == false) {
