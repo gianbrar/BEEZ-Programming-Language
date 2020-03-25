@@ -50,9 +50,10 @@ int main(int argc, char** argv) {
   if (argv1.at(0) == '-') {
     possibleCommand = true;
     if (fileName == "-m" || fileName == "-man") {
-      cout << "Welcome to b++, an interpreter created for the BEEZ Programming Language.\nGENERAL STRUCTURE OF COMMAND: b++ {file name here} {optional command here}\nOPTIONAL COMMANDS: b++ -m or b++ -man: Brings up this help page." << endl;
+      cout << "Welcome to b++, an interpreter created for the BEEZ Programming Language.\nGENERAL STRUCTURE OF COMMAND: b++ {file name or optional command here} {secondary optional command here}\nOPTIONAL COMMANDS: b++ -m or b++ -man: Brings up this help page." << endl;
       return 0;
     }
+    else if (fileName == "-s" || fileName == "-settings")
   }
   if (boost::algorithm::ends_with(fileName, ".BUZZ") == false) {
     if (boost::algorithm::iends_with(fileName, ".BUZZ") == true) {
@@ -73,9 +74,15 @@ int main(int argc, char** argv) {
     return 0;
   }
   while (getline(buzzFile, interpret)) {
-    std::string varCheck = removeCS(removeCS(interpret, 'S'), 'C');
+    std::string varCheck = removeCS(interpret, 'S');
     if (varCheck == "") {
       ERR "Input file is literally just spaces.\nYou might be interested in another joke programming language: whitespace." << endl;
+      return 0;
+    }
+    varCheck = removeCS(varCheck, 'C');
+    if (varCheck == "") {
+      ERR "Input fifle is literally just comments.\nWhat are you thinking? Just write something down in a txt file, jesus..." << endl;
+      return 0;
     }
     if (varCheck.at(0) == '^') {
       if (hive == false) {

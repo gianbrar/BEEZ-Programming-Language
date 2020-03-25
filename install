@@ -6,12 +6,15 @@ if [ $EUID -ne 0 ]
 fi
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
-  cd src/b++/Linux
+  echo 'Detecting operating system as Linux.'
+  cd src/b++
   g++ -o b++ main.cpp
   mv b++ /usr/bin/
   alias b++=/usr/bin/b++
   echo "alias b++=/usr/bin/b++" >> ~/.bashrc
 elif [[ "$OSTYPE" == "darwin"* ]]; then
+  echo 'Detecting operating system as Mac.'
   # MAC OS CODE HERE
-  
+fi
+
 echo "Install successful!"
