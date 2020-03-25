@@ -5,10 +5,14 @@ if [ $EUID -ne 0 ]
   exit
 fi
 
-cd src
-cd b++
-g++ -o b++ main.cpp
-mv b++ /usr/bin/
-alias b++=/usr/bin/b++
-echo "alias b++=/usr/bin/b++" >> ~/.bashrc
+if [[ "$OSTYPE" == "linux-gnu" ]]; then
+  cd src
+  cd b++
+  g++ -o b++ main.cpp
+  mv b++ /usr/bin/
+  alias b++=/usr/bin/b++
+  echo "alias b++=/usr/bin/b++" >> ~/.bashrc
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  # MAC OS CODE HERE
+  
 echo "Install successful!"
