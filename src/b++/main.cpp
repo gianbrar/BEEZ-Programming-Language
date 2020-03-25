@@ -27,7 +27,7 @@ std::string removeCS(std::string ogString, char CS) {
     newOG.erase(std::remove_if(newOG.begin(), newOG.end(), ::isspace), newOG.end());
   }
   else {
-    WARN "Compilation error; char CS defined incorrectly in char** removeCS(std::string ogString, char CS)" << endl;
+    WARN "Compilation error; char CS defined incorrectly in std::string removeCS(std::string ogString, char CS)" << endl;
     return "0";
   }
   return newOG;
@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
   while (getline(buzzFile, interpret)) {
     std::string varCheck = removeCS(removeCS(interpret, 'S'), 'C');
     if (varCheck == "") {
-      ERR "Input file is blank." << endl;
+      ERR "Input file is literally just spaces.\nYou might be interested in another joke programming language: whitespace." << endl;
     }
     if (varCheck.at(0) == '^') {
       if (hive == false) {
