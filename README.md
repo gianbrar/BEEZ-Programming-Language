@@ -21,7 +21,7 @@ AMORTIZED COMB: A version of the COMB type that allows any number of functions a
 
 Where:
 P = Amount of functions allowed
-r= Rate of interest (-t^n)
+r= -t^n
 t = Linecount
 n = Amount of loops allowed
 ƥ = Only acceptable amount of variables. Round if it's a decimal.
