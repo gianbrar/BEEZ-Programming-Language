@@ -9,11 +9,17 @@ bool inFunction = false;
 bool debugMode = false;
 std::string interpret;
 std::string hiveType;
+std::vector<function> uFuncs;
 function uFunc;
 
 int createHive() {
   hive = true;
   hiveType = interpret.substr(1, interpret.length() - 1);
+  if (hiveType.substr(0, 3) == "COMB") {
+  }
+  if (debugMode == true) {
+	  cout << "Detecting hiveType as " << hiveType << endl;
+  }
   return 0;
 }
 
@@ -42,7 +48,7 @@ int main(int argc, char** argv) {
       fileName = argv[1];
       if (argc > 2) {
         secondary = argv[2];
-        if (secondary == "-d" || secondary == "-debug") {
+        if (secondary == "-d" || secondary == "--debug") {
           debugMode = true;
         }
       }
@@ -57,8 +63,8 @@ int main(int argc, char** argv) {
   ssArgv1 >> argv1;
   if (argv1.at(0) == '-') {
     possibleCommand = true;
-    if (fileName == "-m" || fileName == "-man") {
-      cout << "Welcome to b++, an interpreter created for the BEEZ Programming Language.\nGENERAL STRUCTURE OF COMMAND:\nb++ {file name or optional command here} {secondary optional command here}\nOPTIONAL COMMANDS:\nb++ -m or b++ -man: Brings up this help page.\nb++ {file name} -d or b++ {file name} -debug: Runs file in debug mode. (for compiler maintainers)" << endl;
+    if (fileName == "-m" || fileName == "--man") {
+      cout << "Welcome to b++, an interpreter created for the BEEZ Programming Language.\nGENERAL STRUCTURE OF COMMAND:\nb++ {file name or optional command here} {secondary optional command here}\nOPTIONAL COMMANDS:\nb++ -m or b++ --man: Brings up this help page.\nb++ {file name} -d or b++ {file name} --debug: Runs file in debug mode. (for compiler maintainers)" << endl;
       return 0;
     }
   }
@@ -80,18 +86,32 @@ int main(int argc, char** argv) {
     ERR "File is blank." << endl;
     return 0;
   }
+  bool firstWhile = true;
+  int currentIteration = 0;
+  buzzFile.open(fileName.c_str());
   while (getline(buzzFile, interpret)) {
+    if (debugMode == true && firstWhile == true) {
+	    cout << "Began while loop" << endl;
+    }
+    else if (debugMode == true && firstWhile == false) {
+	    ++currentIteration;
+	    cout << "Ran while loop for the " << currentIteration << " time." << endl;
+    }
     std::string varCheck = removeCS(interpret, 'S');
-    if (varCheck == "") {
+    if (varCheck == "" && firstWhile == true) {
       ERR "Input file is literally just spaces.\nYou might be interested in another joke programming language: whitespace." << endl;
       return 0;
     }
     varCheck = removeCS(varCheck, 'C');
-    if (varCheck == "") {
-      ERR "Input fifle is literally just comments.\nWhat are you thinking? Just write something down in a txt file, jesus..." << endl;
+    if (varCheck == "" && firstWhile == true) {
+      ERR "Input file is literally just comments.\nWhat are you thinking? Just write something down in a txt file, jesus..." << endl;
       return 0;
     }
+    firstWhile = false;
     if (varCheck.at(0) == '^') {
+      if (debugMode == true) {
+	      cout << "Detecting hive type declaration." << endl;
+      }
       if (hive == false) {
         if (inFunction == false) {
           createHive();
@@ -130,23 +150,32 @@ int main(int argc, char** argv) {
             }
           }
           int commaF = varCheck.find(',');
-          function uFunc(varCheck.substr(1, commaF - 1), functionArgs);
-        }
+	  if (hiveType == "CELL") {
+          	function uFunc(varCheck.substr(1, commaF - 1), functionArgs);
+	  }
+	}
         else {
           int commaF = varCheck.find(',');
-          function uFunc(varCheck.substr(1, commaF - 1));
+	  if (hiveType == "CELL") {
+          	function uFunc(varCheck.substr(1, commaF - 1));
+	  }
         }
         if (varCheck.back() == '{') {
           inFunction = true;
         }
         else if (varCheck.back() == '}') {
-          uFunc.contents = interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1);
-        }
+	  if (hiveType == "CELL") {
+          	uFunc.contents = interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1);
+          }
+	  else if (hiveType == "COMB") {
+
+	}
         else {
           WARN "Function declared without curly brackets." << endl;
         }  
       }
     }
   }
+  buzzFile.close();
   return 0;
 }
