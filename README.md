@@ -10,21 +10,34 @@ CELL: Acts as a singular instance of the program which can store a singular vari
 ^CELL
 ```
 Above declares a cell hive.
+
 COMB: A version of the CELL type which allows for a predefined number of variables, functions, and loops.
 ```
 ^COMB > 4 <
 ```
 Above declares a comb hive with 4 variables, 4 functions, and 4 loops. This exact amount must be met.
-AMORTIZED COMB: A version of the COMB type that allows any number of functions and loops such as that they fall under its mathematic function for variables as seen [here.](https://cdn.educba.com/academy/wp-content/uploads/2019/01/Amortization-Formula-1.png)
+
+AMORTIZED COMB: A version of the COMB type that allows any number of functions and loops such as that they fall under its mathematic function for variables as seen here: 
+
+![Amortization Formula](https://cdn.educba.com/academy/wp-content/uploads/2019/01/Amortization-Formula-1.png)
+
 Where:
 P = Amount of functions allowed
-r= Rate of interest (-t^n)
-t = Linecount
+
+r= -t^n
+
+t = Linecount excluding the declaration of the variables
+
 n = Amount of loops allowed
+
 ƥ = Only acceptable amount of variables. Round if it's a decimal.
+
+The absolute value of the formula is always taken in this instance.
+
 (Thanks, https://www.educba.com/amortization-formula/)
-```
-^AMORTIZED > 3 < 9 >
 
 ```
-Above declares an amortized comb hive with a max of 3 functions, a max of 9 loops, and 
+^AMORTIZED > 3 < 9 >
+```
+Above declares an amortized comb hive with a max of 3 functions, a max of 9 loops, and 0.17669334445, rounded to 0 variables.
+It is not recommended that amortized hives are used. Ever. They are incredibly stupid and vector hives are far more practical.
