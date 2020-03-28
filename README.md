@@ -39,4 +39,5 @@ The absolute value of the formula is always taken in this instance.
 ```
 ^AMORTIZED > 3 < 9 >
 ```
-Above declares an amortized comb hive with a max of 3 functions, a max of 9 loops, and 
+Above declares an amortized comb hive with a max of 3 functions, a max of 9 loops, and 0.17669334445, rounded to 0 variables.
+It is not recommended that amortized hives are used. Ever. They are incredibly stupid and vector hives are far more practical.
