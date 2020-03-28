@@ -22,7 +22,7 @@ AMORTIZED COMB: A version of the COMB type that allows any number of functions a
 Where:
 P = Amount of functions allowed
 r= -t^n
-t = Linecount
+t = Linecount excluding the declaration of the variables
 n = Amount of loops allowed
 ƥ = Only acceptable amount of variables. Round if it's a decimal.
 (Thanks, https://www.educba.com/amortization-formula/)
