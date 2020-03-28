@@ -23,13 +23,20 @@ AMORTIZED COMB: A version of the COMB type that allows any number of functions a
 
 Where:
 P = Amount of functions allowed
+
 r= -t^n
+
 t = Linecount excluding the declaration of the variables
+
 n = Amount of loops allowed
+
 ƥ = Only acceptable amount of variables. Round if it's a decimal.
+
+The absolute value of the formula is always taken in this instance.
+
 (Thanks, https://www.educba.com/amortization-formula/)
+
 ```
 ^AMORTIZED > 3 < 9 >
-
 ```
 Above declares an amortized comb hive with a max of 3 functions, a max of 9 loops, and 
