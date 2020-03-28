@@ -10,11 +10,13 @@ CELL: Acts as a singular instance of the program which can store a singular vari
 ^CELL
 ```
 Above declares a cell hive.
+
 COMB: A version of the CELL type which allows for a predefined number of variables, functions, and loops.
 ```
 ^COMB > 4 <
 ```
 Above declares a comb hive with 4 variables, 4 functions, and 4 loops. This exact amount must be met.
+
 AMORTIZED COMB: A version of the COMB type that allows any number of functions and loops such as that they fall under its mathematic function for variables as seen here: 
 
 ![Amortization Formula](https://cdn.educba.com/academy/wp-content/uploads/2019/01/Amortization-Formula-1.png)
