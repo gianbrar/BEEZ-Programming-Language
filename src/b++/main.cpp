@@ -7,21 +7,11 @@ using std::endl;
 bool hive = false;
 bool inFunction = false;
 bool debugMode = false;
+int combMax;
 std::string interpret;
 std::string hiveType;
-std::vector<function> uFuncs;
+std::vector<function> vFunc;
 function uFunc;
-
-int createHive() {
-  hive = true;
-  hiveType = interpret.substr(1, interpret.length() - 1);
-  if (hiveType.substr(0, 3) == "COMB") {
-  }
-  if (debugMode == true) {
-	  cout << "Detecting hiveType as " << hiveType << endl;
-  }
-  return 0;
-}
 
 std::string removeCS(std::string ogString, char CS) {
   std::string newOG;
@@ -38,6 +28,22 @@ std::string removeCS(std::string ogString, char CS) {
     return "0";
   }
   return newOG;
+}
+
+int createHive() {
+  hive = true;
+  hiveType = interpret.substr(1, interpret.length() - 1);
+  if (hiveType.substr(0, 3) != "CELL") {
+    std::string CSHiveType = removeCS(removeCS(hiveType, 'S'), 'C');
+    while (hiveType.find(">") != std::string::npos) {
+      CSHiveType.substr(CSHiveType.find(">") + 1, CSHiveType.find("<") -1)
+      CSHiveType.erase(CSHiveType.find(">"));
+    }
+  }
+  if (debugMode == true) {
+	  cout << "Detecting hiveType as " << hiveType << endl;
+  }
+  return 0;
 }
 
 int main(int argc, char** argv) {
@@ -67,6 +73,9 @@ int main(int argc, char** argv) {
       cout << "Welcome to b++, an interpreter created for the BEEZ Programming Language.\nGENERAL STRUCTURE OF COMMAND:\nb++ {file name or optional command here} {secondary optional command here}\nOPTIONAL COMMANDS:\nb++ -m or b++ --man: Brings up this help page.\nb++ {file name} -d or b++ {file name} --debug: Runs file in debug mode. (for compiler maintainers)" << endl;
       return 0;
     }
+    else if (fileName == "-d" || fileName == "--debug") {
+      ERR "Debug mode cannot be activated without input file." << endl;
+    }
   }
   if (boost::algorithm::ends_with(fileName, ".BUZZ") == false) {
     if (boost::algorithm::iends_with(fileName, ".BUZZ") == true) {
@@ -88,6 +97,13 @@ int main(int argc, char** argv) {
   }
   bool firstWhile = true;
   int currentIteration = 0;
+  buzzFile.open(fileName.c_str());
+  int lineCount = 0;
+  std::string empty;
+  while (getline(buzzFile, empty)) {
+    lineCount++;
+  }
+  buzzFile.close();
   buzzFile.open(fileName.c_str());
   while (getline(buzzFile, interpret)) {
     if (debugMode == true && firstWhile == true) {
@@ -169,12 +185,13 @@ int main(int argc, char** argv) {
           }
 	  else if (hiveType == "COMB") {
 
-	}
+	  }
         else {
           WARN "Function declared without curly brackets." << endl;
         }  
       }
     }
+  }
   }
   buzzFile.close();
   return 0;
