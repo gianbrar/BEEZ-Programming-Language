@@ -1,7 +1,7 @@
 #define ERR std::cout << "ERROR: " <<
 #define WARN std::cout << "WARNING: " <<
 #include "libraries.hpp"
-#include "function.hpp"
+#include "variables.hpp"
 bool hive = false;
 bool inFunction = false;
 bool debugMode = false;
@@ -14,7 +14,17 @@ function* pFunc;
 char startingChar;
 char endingChar;
 int iStartingChar;
+int currentFuncDef = -1;
+int maxFuncDef;
 
+int combUp() {
+  ++currentFuncDef;
+  if (currentFuncDef == maxFuncDef) {
+    ERR "Maximum function definition reached!" << std::endl;
+    exit(0);
+  }
+  return 0;
+}
 
 std::string removeCS(std::string ogString, char CS) {
   std::string newOG;
@@ -50,7 +60,7 @@ int createHive() {
   hiveType = interpret.substr(1, interpret.length() - 1);
   if (hiveType.substr(0, 3) != "CELL") {
     std::string CSHiveType = removeCS(removeCS(hiveType, 'S'), 'C');
-    std::string hiveTypeContent;
+    std::vector<int> hiveTypeContent;
     iStartingChar = 2;
     charCheck();
     while (hiveType.find(startingChar) != std::string::npos) {
@@ -58,13 +68,26 @@ int createHive() {
         ERR "Cannot declare start token '" << startingChar << "' without ending token '" << endingChar << "'" << std::endl;
         return 0;
       }
-      hiveTypeContent = CSHiveType.substr(CSHiveType.find(">") + 1, CSHiveType.find("<") - 1);
+      std::string tempHiveTypeContent = CSHiveType.substr(CSHiveType.find(">") + 1, CSHiveType.find("<") - 1);
+      std::stringstream ssHiveTypeContent(tempHiveTypeContent);
+      int iHiveTypeContent;
+      ssHiveTypeContent >> iHiveTypeContent;
+      hiveTypeContent.push_back(iHiveTypeContent);
       CSHiveType.erase(CSHiveType.find(startingChar));
+      ++iStartingChar;
       charCheck();
+    }
+    if (hiveType.substr(0, 3) == "COMB") {
+      if (hiveTypeContent.size() > 1) {
+        ERR "More than one size provided despite being comb." << std::endl;
+        return 0;
+      }
+      maxFuncDef = hiveTypeContent.at(0);
+      pFunc = new function[maxFuncDef];
     }
   }
   if (debugMode == true) {
-	  std::cout << "Detecting hiveType as " << hiveType << std::endl;
+	  std::cout << "Detecting hiveType as " << hiveType.substr(0, 3) << std::endl;
   }
   return 0;
 }
@@ -162,7 +185,7 @@ int main(int argc, char** argv) {
       continue;
     }
     if (varCheck.at(0) == '^') {
-      commandRecognized == true;
+      commandRecognized = true;
       if (debugMode == true) {
 	      std::cout << "Detecting hive type declaration." << std::endl;
       }
@@ -223,7 +246,8 @@ int main(int argc, char** argv) {
           	uFunc.contents = interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1);
           }
 	        else if (hiveType == "COMB") {
-            
+            combUp();
+            pFunc[currentFuncDef] = interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1);
           }
         else {
           WARN "Function declared without curly brackets." << std::endl;
