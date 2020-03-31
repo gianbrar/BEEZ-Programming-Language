@@ -1,9 +1,7 @@
-#define ERR cout << "ERROR: " <<
-#define WARN cout << "WARNING: " << 
+#define ERR std::cout << "ERROR: " <<
+#define WARN std::cout << "WARNING: " <<
 #include "libraries.hpp"
 #include "function.hpp"
-using std::cout;
-using std::endl;
 bool hive = false;
 bool inFunction = false;
 bool debugMode = false;
@@ -12,6 +10,11 @@ std::string interpret;
 std::string hiveType;
 std::vector<function> vFunc;
 function uFunc;
+function* pFunc;
+char startingChar;
+char endingChar;
+int iStartingChar;
+
 
 std::string removeCS(std::string ogString, char CS) {
   std::string newOG;
@@ -24,10 +27,22 @@ std::string removeCS(std::string ogString, char CS) {
     newOG.erase(std::remove_if(newOG.begin(), newOG.end(), ::isspace), newOG.end());
   }
   else {
-    WARN "Compilation error; char CS defined incorrectly in std::string removeCS(std::string ogString, char CS)" << endl;
+    WARN "Compilation error; char CS defined incorrectly in std::string removeCS(std::string ogString, char CS)" << std::endl;
     return "0";
   }
   return newOG;
+}
+
+int charCheck() {
+  if (iStartingChar % 2 == 0) {
+    startingChar = '>';
+    endingChar = '<';
+  }
+  else {
+    startingChar = '<';
+    endingChar = '>';
+  }
+  return 0;
 }
 
 int createHive() {
@@ -35,13 +50,21 @@ int createHive() {
   hiveType = interpret.substr(1, interpret.length() - 1);
   if (hiveType.substr(0, 3) != "CELL") {
     std::string CSHiveType = removeCS(removeCS(hiveType, 'S'), 'C');
-    while (hiveType.find(">") != std::string::npos) {
-      CSHiveType.substr(CSHiveType.find(">") + 1, CSHiveType.find("<") -1)
-      CSHiveType.erase(CSHiveType.find(">"));
+    std::string hiveTypeContent;
+    iStartingChar = 2;
+    charCheck();
+    while (hiveType.find(startingChar) != std::string::npos) {
+      if (CSHiveType.find("<") == std::string::npos) {
+        ERR "Cannot declare start token '" << startingChar << "' without ending token '" << endingChar << "'" << std::endl;
+        return 0;
+      }
+      hiveTypeContent = CSHiveType.substr(CSHiveType.find(">") + 1, CSHiveType.find("<") - 1);
+      CSHiveType.erase(CSHiveType.find(startingChar));
+      charCheck();
     }
   }
   if (debugMode == true) {
-	  cout << "Detecting hiveType as " << hiveType << endl;
+	  std::cout << "Detecting hiveType as " << hiveType << std::endl;
   }
   return 0;
 }
@@ -60,7 +83,7 @@ int main(int argc, char** argv) {
       }
     }
   else {
-      ERR "No input files given." << endl;
+      ERR "No input files given." << std::endl;
       return 0;
   }
   std::string argv1;
@@ -70,11 +93,12 @@ int main(int argc, char** argv) {
   if (argv1.at(0) == '-') {
     possibleCommand = true;
     if (fileName == "-m" || fileName == "--man") {
-      cout << "Welcome to b++, an interpreter created for the BEEZ Programming Language.\nGENERAL STRUCTURE OF COMMAND:\nb++ {file name or optional command here} {secondary optional command here}\nOPTIONAL COMMANDS:\nb++ -m or b++ --man: Brings up this help page.\nb++ {file name} -d or b++ {file name} --debug: Runs file in debug mode. (for compiler maintainers)" << endl;
+      std::cout << "Welcome to b++, an interpreter created for the BEEZ Programming Language.\nGENERAL STRUCTURE OF COMMAND:\nb++ {file name or optional command here} {secondary optional command here}\nOPTIONAL COMMANDS:\nb++ -m or b++ --man: Brings up this help page.\nb++ {file name} -d or b++ {file name} --debug: Runs file in debug mode. (for compiler maintainers)" << std::endl;
       return 0;
     }
     else if (fileName == "-d" || fileName == "--debug") {
-      ERR "Debug mode cannot be activated without input file." << endl;
+      ERR "Debug mode cannot be activated without input file." << std::endl;
+      return 0;
     }
   }
   if (boost::algorithm::ends_with(fileName, ".BUZZ") == false) {
@@ -85,17 +109,21 @@ int main(int argc, char** argv) {
   }
   std::ifstream buzzFile(fileName.c_str());
   if (!buzzFile) {
-    ERR "File '" << fileName << "' does not exist!" << endl;
+    ERR "File '" << fileName << "' does not exist!" << std::endl;
     if (possibleCommand == true) {
-      cout << "Did you mean to type in a command?" << endl;
+      std::cout << "Did you mean to type in a command?" << std::endl;
     }
     return 0;
   }
   if (buzzFile.peek() == std::ifstream::traits_type::eof()) {
-    ERR "File is blank." << endl;
+    ERR "File is blank." << std::endl;
     return 0;
   }
   bool firstWhile = true;
+  bool commentJoke = false;
+  bool spaceJoke = false;
+  int spaceI = 0;
+  int commentI = 0;
   int currentIteration = 0;
   buzzFile.open(fileName.c_str());
   int lineCount = 0;
@@ -105,44 +133,55 @@ int main(int argc, char** argv) {
   }
   buzzFile.close();
   buzzFile.open(fileName.c_str());
+  bool possibleJoke = false;
+  bool commandRecognized = false;
   while (getline(buzzFile, interpret)) {
     if (debugMode == true && firstWhile == true) {
-	    cout << "Began while loop" << endl;
+	    std::cout << "Began while loop" << std::endl;
     }
     else if (debugMode == true && firstWhile == false) {
 	    ++currentIteration;
-	    cout << "Ran while loop for the " << currentIteration << " time." << endl;
-    }
-    std::string varCheck = removeCS(interpret, 'S');
-    if (varCheck == "" && firstWhile == true) {
-      ERR "Input file is literally just spaces.\nYou might be interested in another joke programming language: whitespace." << endl;
-      return 0;
-    }
-    varCheck = removeCS(varCheck, 'C');
-    if (varCheck == "" && firstWhile == true) {
-      ERR "Input file is literally just comments.\nWhat are you thinking? Just write something down in a txt file, jesus..." << endl;
-      return 0;
+	    std::cout << "Ran while loop for the " << currentIteration << " time." << std::endl;
     }
     firstWhile = false;
+    if (interpret == "") {
+      continue;
+    }
+    std::string varCheck = removeCS(interpret, 'C');
+    if (varCheck == "") {
+      commentJoke = true;
+      commentI += 1;
+    }
+    varCheck = removeCS(varCheck, 'S');
+    if (varCheck == "") {
+      if (commentJoke == false) {
+        spaceJoke = true;
+        spaceI += 1;
+      }
+      possibleJoke = true;
+      continue;
+    }
     if (varCheck.at(0) == '^') {
+      commandRecognized == true;
       if (debugMode == true) {
-	      cout << "Detecting hive type declaration." << endl;
+	      std::cout << "Detecting hive type declaration." << std::endl;
       }
       if (hive == false) {
         if (inFunction == false) {
           createHive();
         }
         else {
-          ERR "Cannot declare hive type inside of function." << endl;
+          ERR "Cannot declare hive type inside of function." << std::endl;
           return 0;
         }
       }
       else {
-        ERR "Hive type already declared." << endl;
+        ERR "Hive type already declared." << std::endl;
         return 0;
       }
     }
     if (varCheck.substr(0, 3) == "BUZZ") {
+      commandRecognized = true;
       varCheck.erase(0, 3);
       if (varCheck.at(0) == '(') {
         if (varCheck.find(',') != std::string::npos) {
@@ -162,37 +201,49 @@ int main(int argc, char** argv) {
               functionArgs.push_back(varCheck.substr(varCheck.find(',') + 1, secondVarCheckFind));
             }
             else {
-              functionArgs.push_back(varCheck.substr(varCheck.find(','), varCheck.find_last_of(")")));
+              functionArgs.push_back(varCheck.substr(varCheck.find(','), varCheck.find_last_of(')')));
             }
           }
           int commaF = varCheck.find(',');
-	  if (hiveType == "CELL") {
+	        if (hiveType == "CELL") {
           	function uFunc(varCheck.substr(1, commaF - 1), functionArgs);
-	  }
-	}
+	        }
+	      }
         else {
           int commaF = varCheck.find(',');
-	  if (hiveType == "CELL") {
+	        if (hiveType == "CELL") {
           	function uFunc(varCheck.substr(1, commaF - 1));
-	  }
+	          } 
         }
         if (varCheck.back() == '{') {
           inFunction = true;
         }
         else if (varCheck.back() == '}') {
-	  if (hiveType == "CELL") {
+	        if (hiveType == "CELL") {
           	uFunc.contents = interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1);
           }
-	  else if (hiveType == "COMB") {
-
-	  }
+	        else if (hiveType == "COMB") {
+            
+          }
         else {
-          WARN "Function declared without curly brackets." << endl;
+          WARN "Function declared without curly brackets." << std::endl;
         }  
       }
     }
   }
   }
   buzzFile.close();
+  std::string jokeTest;
+  if (possibleJoke == true) {
+    if (spaceI == lineCount) {
+      ERR "File is just spaces.\nYou may be interested in the joke programming language, whitespace." << std::endl;
+    }
+    else if (commentI == lineCount || spaceI + commentI == lineCount) {
+      ERR "File is just comments.\nCouldn't you have just used a .txt file?" << std::endl;
+    }
+    else {
+      ERR "Unknown compilation error." << std::endl;
+    }
+  }
   return 0;
 }
