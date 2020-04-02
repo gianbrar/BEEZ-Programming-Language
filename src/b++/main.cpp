@@ -17,22 +17,34 @@ int iStartingChar;
 int currentFuncDef = -1;
 int maxFuncDef;
 
+int debug(std::string msg) {
+  if (debugMode == true) {
+    std::cout << msg << std::endl;
+  }
+  return 0;
+}
+
 int combUp() {
   ++currentFuncDef;
   if (currentFuncDef == maxFuncDef) {
-    ERR "Maximum function definition reached!" << std::endl;
+    ERR "Maximum function definition exceeded!" << std::endl;
     exit(0);
   }
   return 0;
 }
 
 std::string removeCS(std::string ogString, char CS) {
+  debug("Inside std::string removeCS");
   std::string newOG;
   if (CS == 'C') {
+    debug("Removing all comments.");
     newOG = ogString;
-    newOG.erase(newOG.find("?"));
+    if (newOG.find("?") != std::string::npos) {
+	    newOG.erase(newOG.find("?"));
+    }
   }
   else if (CS == 'S') {
+    debug("Removing all spaces.");
     newOG = ogString;
     newOG.erase(std::remove_if(newOG.begin(), newOG.end(), ::isspace), newOG.end());
   }
@@ -40,7 +52,8 @@ std::string removeCS(std::string ogString, char CS) {
     WARN "Compilation error; char CS defined incorrectly in std::string removeCS(std::string ogString, char CS)" << std::endl;
     return "0";
   }
-  return newOG;
+   debug("Returning newOG and exiting to main.");
+   return newOG;
 }
 
 int charCheck() {
@@ -63,10 +76,10 @@ int createHive() {
     std::vector<int> hiveTypeContent;
     iStartingChar = 2;
     charCheck();
-    while (hiveType.find(startingChar) != std::string::npos) {
-      if (CSHiveType.find("<") == std::string::npos) {
+    while (CSHiveType.find(startingChar) != std::string::npos) {
+      if (CSHiveType.find(endingChar) == std::string::npos) {
         ERR "Cannot declare start token '" << startingChar << "' without ending token '" << endingChar << "'" << std::endl;
-        return 0;
+        exit(0);
       }
       std::string tempHiveTypeContent = CSHiveType.substr(CSHiveType.find(">") + 1, CSHiveType.find("<") - 1);
       std::stringstream ssHiveTypeContent(tempHiveTypeContent);
@@ -77,17 +90,44 @@ int createHive() {
       ++iStartingChar;
       charCheck();
     }
-    if (hiveType.substr(0, 3) == "COMB") {
+    if (hiveType == "COMB") {
+      if (debugMode == true) {
+      	std::cout << "Entered case for COMB." << std::endl;
+      }
       if (hiveTypeContent.size() > 1) {
         ERR "More than one size provided despite being comb." << std::endl;
         return 0;
       }
-      maxFuncDef = hiveTypeContent.at(0);
+      else if (hiveTypeContent.size() < 1) {
+        WARN "No arguments provided for COMB; defaulting to CELL." << std::endl;
+        hiveType = "CELL";
+        return 0;
+      }
+      if (debugMode == true) {
+	      std::cout << "Correct size provided." << std::endl;
+      }
+      maxFuncDef = hiveTypeContent.front();
       pFunc = new function[maxFuncDef];
+      if (debugMode == true) {
+	      std::cout << "Dynamic array pFunc declared with maximum size of " << maxFuncDef << std::endl;
     }
   }
   if (debugMode == true) {
-	  std::cout << "Detecting hiveType as " << hiveType.substr(0, 3) << std::endl;
+	  std::cout << "Detecting hiveType as " << hiveType << "\nSize of hiveTypeContent is " << hiveTypeContent.size() << "\nValues in hiveTypeContent are:" << std::endl;
+    for (int i = 0; i < hiveTypeContent.size(); i++) {
+      std::cout << hiveTypeContent.at(i);
+      if (i != hiveTypeContent.size() - 1) {
+        std::cout << ", ";
+      }
+      else {
+        std::cout << std::endl;
+      }
+    }
+  }
+  hiveType = CSHiveType.substr(0, CSHiveType.find(">") - 1);
+  if (debugMode == true) {
+    std::cout << "Final hiveType is " << hiveType << std::endl;
+  }
   }
   return 0;
 }
@@ -159,25 +199,43 @@ int main(int argc, char** argv) {
   bool possibleJoke = false;
   bool commandRecognized = false;
   while (getline(buzzFile, interpret)) {
-    if (debugMode == true && firstWhile == true) {
-	    std::cout << "Began while loop" << std::endl;
-    }
-    else if (debugMode == true && firstWhile == false) {
-	    ++currentIteration;
-	    std::cout << "Ran while loop for the " << currentIteration << " time." << std::endl;
+    if (debugMode == true) {
+    	if (firstWhile == true) {
+	      std::cout << "Began while loop" << std::endl;
+    	}
+    	else if (firstWhile == false) {
+	      ++currentIteration;
+	      std::cout << "Ran while loop for the " << currentIteration << " time." << std::endl;
+    	}
+	    std::cout << "Reading line as " << interpret << std::endl;
     }
     firstWhile = false;
     if (interpret == "") {
-      continue;
+       if (debugMode == true) {
+	       std::cout << "Skipping current loop" << std::endl;
+       }
+       continue;
     }
     std::string varCheck = removeCS(interpret, 'C');
+    if (debugMode == true) {
+	    std::cout << "Successfully removed all comments." << std::endl;
+    }
     if (varCheck == "") {
+      if (debugMode == true) {
+      	std::cout << "Possible comment joke trigger detected." << std::endl;
+      }
       commentJoke = true;
       commentI += 1;
     }
     varCheck = removeCS(varCheck, 'S');
+    if (debugMode == true) {
+	    std::cout << "Successfully removed all spsaces." << std::endl;
+    }
     if (varCheck == "") {
       if (commentJoke == false) {
+	      if (debugMode == true) {
+	        std::cout << "Possible space joke trigger detected." << std::endl;
+	      }
         spaceJoke = true;
         spaceI += 1;
       }
@@ -206,7 +264,8 @@ int main(int argc, char** argv) {
     if (varCheck.substr(0, 3) == "BUZZ") {
       commandRecognized = true;
       varCheck.erase(0, 3);
-      if (varCheck.at(0) == '(') {
+      if (varCheck.find("(") != std::string::npos) {
+        std::string funcName = interpret.substr(0, varCheck.find("("));
         if (varCheck.find(',') != std::string::npos) {
           int secondVarCheckFind;
           int varCheckFindI = 1;
@@ -229,13 +288,20 @@ int main(int argc, char** argv) {
           }
           int commaF = varCheck.find(',');
 	        if (hiveType == "CELL") {
-          	function uFunc(varCheck.substr(1, commaF - 1), functionArgs);
+          	function uFunc(funcName, functionArgs);
 	        }
+          else if (hiveType == "COMB") {
+            combUp();
+            pFunc[currentFuncDef].name = funcName;
+            for (int i = 0; i < functionArgs.size(); i++) {
+              pFunc[currentFuncDef].args.push_back(functionArgs.at(i));
+            }
+          }
 	      }
         else {
           int commaF = varCheck.find(',');
 	        if (hiveType == "CELL") {
-          	function uFunc(varCheck.substr(1, commaF - 1));
+          	function uFunc(funcName);
 	          } 
         }
         if (varCheck.back() == '{') {
@@ -252,6 +318,12 @@ int main(int argc, char** argv) {
         else {
           WARN "Function declared without curly brackets." << std::endl;
         }  
+      }
+      continue;
+    }
+    if (interpret.find("(") != std::string::npos) {
+      if (interpret.substr(interpret.find("("), interpret.find("(") + 1) != ")") {
+
       }
     }
   }
