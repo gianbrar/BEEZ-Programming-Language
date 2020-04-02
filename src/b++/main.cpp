@@ -1,5 +1,6 @@
 #define ERR std::cout << "ERROR: " <<
 #define WARN std::cout << "WARNING: " <<
+#define ENDL << std::endl
 #include "libraries.hpp"
 #include "variables.hpp"
 bool hive = false;
@@ -19,7 +20,7 @@ int maxFuncDef;
 
 int debug(std::string msg) {
   if (debugMode == true) {
-    std::cout << msg << std::endl;
+    std::cout << msg ENDL;
   }
   return 0;
 }
@@ -27,7 +28,7 @@ int debug(std::string msg) {
 int combUp() {
   ++currentFuncDef;
   if (currentFuncDef == maxFuncDef) {
-    ERR "Maximum function definition exceeded!" << std::endl;
+    ERR "Maximum function definition exceeded!" ENDL;
     exit(0);
   }
   return 0;
@@ -49,7 +50,7 @@ std::string removeCS(std::string ogString, char CS) {
     newOG.erase(std::remove_if(newOG.begin(), newOG.end(), ::isspace), newOG.end());
   }
   else {
-    WARN "Compilation error; char CS defined incorrectly in std::string removeCS(std::string ogString, char CS)" << std::endl;
+    WARN "Compilation error; char CS defined incorrectly in std::string removeCS(std::string ogString, char CS)" ENDL;
     return "0";
   }
    debug("Returning newOG and exiting to main.");
@@ -78,7 +79,7 @@ int createHive() {
     charCheck();
     while (CSHiveType.find(startingChar) != std::string::npos) {
       if (CSHiveType.find(endingChar) == std::string::npos) {
-        ERR "Cannot declare start token '" << startingChar << "' without ending token '" << endingChar << "'" << std::endl;
+        ERR "Cannot declare start token '" << startingChar << "' without ending token '" << endingChar << "'" ENDL;
         exit(0);
       }
       std::string tempHiveTypeContent = CSHiveType.substr(CSHiveType.find(">") + 1, CSHiveType.find("<") - 1);
@@ -92,41 +93,41 @@ int createHive() {
     }
     if (hiveType == "COMB") {
       if (debugMode == true) {
-      	std::cout << "Entered case for COMB." << std::endl;
+      	std::cout << "Entered case for COMB." ENDL;
       }
       if (hiveTypeContent.size() > 1) {
-        ERR "More than one size provided despite being comb." << std::endl;
+        ERR "More than one size provided despite being comb." ENDL;
         return 0;
       }
       else if (hiveTypeContent.size() < 1) {
-        WARN "No arguments provided for COMB; defaulting to CELL." << std::endl;
+        WARN "No arguments provided for COMB; defaulting to CELL." ENDL;
         hiveType = "CELL";
         return 0;
       }
       if (debugMode == true) {
-	      std::cout << "Correct size provided." << std::endl;
+	      std::cout << "Correct size provided." ENDL;
       }
       maxFuncDef = hiveTypeContent.front();
       pFunc = new function[maxFuncDef];
       if (debugMode == true) {
-	      std::cout << "Dynamic array pFunc declared with maximum size of " << maxFuncDef << std::endl;
+	      std::cout << "Dynamic array pFunc declared with maximum size of " << maxFuncDef ENDL;
     }
   }
   if (debugMode == true) {
-	  std::cout << "Detecting hiveType as " << hiveType << "\nSize of hiveTypeContent is " << hiveTypeContent.size() << "\nValues in hiveTypeContent are:" << std::endl;
+	  std::cout << "Detecting hiveType as " << hiveType << "\nSize of hiveTypeContent is " << hiveTypeContent.size() << "\nValues in hiveTypeContent are:" ENDL;
     for (int i = 0; i < hiveTypeContent.size(); i++) {
       std::cout << hiveTypeContent.at(i);
       if (i != hiveTypeContent.size() - 1) {
         std::cout << ", ";
       }
       else {
-        std::cout << std::endl;
+        std::cout ENDL;
       }
     }
   }
   hiveType = CSHiveType.substr(0, CSHiveType.find(">") - 1);
   if (debugMode == true) {
-    std::cout << "Final hiveType is " << hiveType << std::endl;
+    std::cout << "Final hiveType is " << hiveType ENDL;
   }
   }
   return 0;
@@ -135,6 +136,7 @@ int createHive() {
 int main(int argc, char** argv) {
   std::string fileName;
   std::string secondary;
+  bool connectionStart = false;
   bool possibleCommand = false;
   if (argc > 1) {
       fileName = argv[1];
@@ -146,7 +148,7 @@ int main(int argc, char** argv) {
       }
     }
   else {
-      ERR "No input files given." << std::endl;
+      ERR "No input files given." ENDL;
       return 0;
   }
   std::string argv1;
@@ -156,11 +158,11 @@ int main(int argc, char** argv) {
   if (argv1.at(0) == '-') {
     possibleCommand = true;
     if (fileName == "-m" || fileName == "--man") {
-      std::cout << "Welcome to b++, an interpreter created for the BEEZ Programming Language.\nGENERAL STRUCTURE OF COMMAND:\nb++ {file name or optional command here} {secondary optional command here}\nOPTIONAL COMMANDS:\nb++ -m or b++ --man: Brings up this help page.\nb++ {file name} -d or b++ {file name} --debug: Runs file in debug mode. (for compiler maintainers)" << std::endl;
+      std::cout << "Welcome to b++, an interpreter created for the BEEZ Programming Language.\nGENERAL STRUCTURE OF COMMAND:\nb++ {file name or optional command here} {secondary optional command here}\nOPTIONAL COMMANDS:\nb++ -m or b++ --man: Brings up this help page.\nb++ {file name} -d or b++ {file name} --debug: Runs file in debug mode. (for compiler maintainers)" ENDL;
       return 0;
     }
     else if (fileName == "-d" || fileName == "--debug") {
-      ERR "Debug mode cannot be activated without input file." << std::endl;
+      ERR "Debug mode cannot be activated without input file." ENDL;
       return 0;
     }
   }
@@ -172,14 +174,14 @@ int main(int argc, char** argv) {
   }
   std::ifstream buzzFile(fileName.c_str());
   if (!buzzFile) {
-    ERR "File '" << fileName << "' does not exist!" << std::endl;
+    ERR "File '" << fileName << "' does not exist!" ENDL;
     if (possibleCommand == true) {
-      std::cout << "Did you mean to type in a command?" << std::endl;
+      std::cout << "Did you mean to type in a command?" ENDL;
     }
     return 0;
   }
   if (buzzFile.peek() == std::ifstream::traits_type::eof()) {
-    ERR "File is blank." << std::endl;
+    ERR "File is blank." ENDL;
     return 0;
   }
   bool firstWhile = true;
@@ -201,40 +203,40 @@ int main(int argc, char** argv) {
   while (getline(buzzFile, interpret)) {
     if (debugMode == true) {
     	if (firstWhile == true) {
-	      std::cout << "Began while loop" << std::endl;
+	      std::cout << "Began while loop" ENDL;
     	}
     	else if (firstWhile == false) {
 	      ++currentIteration;
-	      std::cout << "Ran while loop for the " << currentIteration << " time." << std::endl;
+	      std::cout << "Ran while loop for the " << currentIteration << " time." ENDL;
     	}
-	    std::cout << "Reading line as " << interpret << std::endl;
+	    std::cout << "Reading line as " << interpret ENDL;
     }
     firstWhile = false;
     if (interpret == "") {
        if (debugMode == true) {
-	       std::cout << "Skipping current loop" << std::endl;
+	       std::cout << "Skipping current loop" ENDL;
        }
        continue;
     }
     std::string varCheck = removeCS(interpret, 'C');
     if (debugMode == true) {
-	    std::cout << "Successfully removed all comments." << std::endl;
+	    std::cout << "Successfully removed all comments." ENDL;
     }
     if (varCheck == "") {
       if (debugMode == true) {
-      	std::cout << "Possible comment joke trigger detected." << std::endl;
+      	std::cout << "Possible comment joke trigger detected." ENDL;
       }
       commentJoke = true;
       commentI += 1;
     }
     varCheck = removeCS(varCheck, 'S');
     if (debugMode == true) {
-	    std::cout << "Successfully removed all spsaces." << std::endl;
+	    std::cout << "Successfully removed all spsaces." ENDL;
     }
     if (varCheck == "") {
       if (commentJoke == false) {
 	      if (debugMode == true) {
-	        std::cout << "Possible space joke trigger detected." << std::endl;
+	        std::cout << "Possible space joke trigger detected." ENDL;
 	      }
         spaceJoke = true;
         spaceI += 1;
@@ -245,19 +247,19 @@ int main(int argc, char** argv) {
     if (varCheck.at(0) == '^') {
       commandRecognized = true;
       if (debugMode == true) {
-	      std::cout << "Detecting hive type declaration." << std::endl;
+	      std::cout << "Detecting hive type declaration." ENDL;
       }
       if (hive == false) {
         if (inFunction == false) {
           createHive();
         }
         else {
-          ERR "Cannot declare hive type inside of function." << std::endl;
+          ERR "Cannot declare hive type inside of function." ENDL;
           return 0;
         }
       }
       else {
-        ERR "Hive type already declared." << std::endl;
+        ERR "Hive type already declared." ENDL;
         return 0;
       }
     }
@@ -316,29 +318,37 @@ int main(int argc, char** argv) {
             pFunc[currentFuncDef] = interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1);
           }
         else {
-          WARN "Function declared without curly brackets." << std::endl;
+          WARN "Function declared without curly brackets." ENDL;
         }  
       }
       continue;
     }
-    if (interpret.find("(") != std::string::npos) {
-      if (interpret.substr(interpret.find("("), interpret.find("(") + 1) != ")") {
-
+  }
+  if (interpret.find("(") != std::string::npos) {
+    if (interpret.substr(interpret.find("("), interpret.find("(") + 1) != ")") {
+      if (connectionStart == true) {
+        ERR "Cannot define connection inside connection. You just smashed two bees into each other. You monster." ENDL;
+        return 0;
       }
+      connectionStart = true;
+      continue;
     }
+  }
+  else {
+    ERR "No closing paranthese found!" ENDL;
   }
   }
   buzzFile.close();
   std::string jokeTest;
   if (possibleJoke == true) {
     if (spaceI == lineCount) {
-      ERR "File is just spaces.\nYou may be interested in the joke programming language, whitespace." << std::endl;
+      ERR "File is just spaces.\nYou may be interested in the completely serious programming language, whitespace." ENDL;
     }
     else if (commentI == lineCount || spaceI + commentI == lineCount) {
-      ERR "File is just comments.\nCouldn't you have just used a .txt file?" << std::endl;
+      ERR "File is just comments.\nCouldn't you have just used a .txt file?" ENDL;
     }
     else {
-      ERR "Unknown compilation error." << std::endl;
+      ERR "Unknown compilation error." ENDL;
     }
   }
   return 0;
