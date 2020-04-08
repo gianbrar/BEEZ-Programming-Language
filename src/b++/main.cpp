@@ -336,7 +336,9 @@ int process(std::string interpret) {
           }
           int commaF = varCheck.find(',');
 	        if (hiveType == "CELL") {
-          	function uFunc(funcName, functionArgs);
+          	function nFunc(funcName, functionArgs);
+            uFunc.name = nFunc.name;
+            uFunc.contents = nFunc.contents;
 	        }
           else if (hiveType == "COMB") {
             combUp("function");
@@ -349,7 +351,7 @@ int process(std::string interpret) {
         else {
           int commaF = varCheck.find(',');
 	        if (hiveType == "CELL") {
-          	function uFunc(funcName);
+          	  uFunc.name = funcName;
 	          }
           else if (hiveType == "COMB") {
             combUp("function");
@@ -467,6 +469,11 @@ int process(std::string interpret) {
         return 0;
     }  
   }
+  if (hiveType == "CELL") {
+    if (varCheck.find(uFunc.name + "(") != std::string::npos && varCheck.find(")") != std::string::npos) {
+      process(uFunc.contents);
+    }
+  }
   return 0;
 }
 
@@ -524,7 +531,6 @@ int main(int argc, char** argv) {
   buzzFile.close();
   buzzFile.open(fileName.c_str());
   bool possibleJoke = false;
-  bool commandRecognized = false;
   std::vector<std::string> stripes;
   bool firstWingDefined = false;
   while (getline(buzzFile, fValue)) {
