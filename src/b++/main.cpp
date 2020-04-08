@@ -17,6 +17,7 @@ char endingChar;
 int iStartingChar;
 int currentFuncDef = -1;
 int maxFuncDef;
+int maxVarDef;
 bool possibleJoke = false;
 bool commandRecognized = false;
 std::vector<std::string> stripes;
@@ -36,9 +37,12 @@ std::string secondary;
 std::string secondWingContent;
 bool connectionStart = false;
 bool bodyDefined = false;
+int currentVarDef = 0;
 std::string tempVariable;
 bool possibleCommand = false;
 std::vector<variable> varList;
+variable* pVar;
+variable var;
 
 int debug(std::string msg) {
   if (debugMode == true) {
@@ -47,11 +51,22 @@ int debug(std::string msg) {
   return 0;
 }
 
-int combUp() {
-  ++currentFuncDef;
-  if (currentFuncDef == maxFuncDef) {
-    ERR "Maximum function definition exceeded!" ENDL;
-    exit(0);
+
+
+int combUp(std::string type) {
+  if (type == "function") {
+    ++currentFuncDef;
+    if (currentFuncDef == maxFuncDef) {
+      ERR "Maximum function definition exceeded!" ENDL;
+      exit(0);
+    }
+  }
+  else if (type == "var") {
+    ++currentVarDef;
+    if (currentVarDef == maxVarDef) {
+      ERR "Maximum variable definition exceeded!" ENDL;
+      exit(0);
+    }
   }
   return 0;
 }
@@ -62,8 +77,13 @@ std::string removeCS(std::string ogString, char CS) {
   if (CS == 'C') {
     debug("Removing all comments.");
     newOG = ogString;
-    if (newOG.find("?") != std::string::npos) {
-	    newOG.erase(newOG.find("?"));
+    if (newOG.find("??") != std::string::npos) {
+      if (newOG.at(newOG.find("??") - 1) != '\\') {
+	      newOG.erase(newOG.find("??"));
+      }
+      else {
+        newOG.erase(newOG.find("??") - 1, 1);
+      }
     }
   }
   else if (CS == 'S') {
@@ -130,7 +150,9 @@ int createHive() {
 	      std::cout << "Correct size provided." ENDL;
       }
       maxFuncDef = hiveTypeContent.front();
+      maxVarDef = maxFuncDef;
       pFunc = new function[maxFuncDef];
+      pVar = new variable[maxVarDef];
       if (debugMode == true) {
 	      std::cout << "Dynamic array pFunc declared with maximum size of " << maxFuncDef ENDL;
     }
@@ -216,40 +238,82 @@ int process(std::string interpret) {
       }
       return 0;
     }
+    bool fileWrite = false;
     if (interpret.find("BUZZ@") != std::string::npos) {
       debug("Detecting BUZZ@");
-      interpret.erase(0, 5);
+      interpret = interpret.substr(interpret.find("BUZZ@") + 5, interpret.length() - 1);
       if (interpret.substr(0, 7) == "console") {
         debug("Sending message to console");
         interpret.erase(0, 8);
         varCheck.erase(0, 12);
-        if (varCheck.at(0) == '"') {
+      }
+      if (varCheck.at(0) == '"') {
           debug("Found string");
           int firstQuotation = interpret.find('"');
           std::string secondQuotation = interpret.substr(interpret.find('"') + 1, interpret.length() - 1);
           interpret = interpret.substr(firstQuotation + 1, secondQuotation.find('"'));
           while (interpret.find("</") != std::string::npos && interpret.substr(interpret.find("</"), interpret.find("</") - 1) != "\\") {
             tempVariable = interpret.substr(interpret.find("</") + 2, interpret.length() - 1);
-            tempVariable = tempVariable.substr(0, tempVariable.find(" ") - 1);
-            for (int i = 0; i < varList.size(); i++) {
-              if (varList.at(i).name == tempVariable) {
-                interpret.replace(interpret.find("</") + 2, tempVariable.length(), varList.at(i).contents);
+            debug("Temp variable is " + tempVariable);
+            tempVariable = tempVariable.substr(0, tempVariable.find(" "));
+            debug("Temp variable changed to " + tempVariable);
+            bool replaceSuccess = false;
+            if (tempVariable.find("\\") != std::string::npos) {
+              tempVariable.erase(tempVariable.find("\\"), 2);
+              interpret.erase(interpret.find("\\"), 1);
+            }
+            if (hiveType == "NEST") {
+              for (int i = 0; i < varList.size(); i++) {
+                if (varList.at(i).name == tempVariable) {
+                  debug("Matching variable is " + varList.at(i).name);
+                  interpret.replace(interpret.find("</"), tempVariable.length() + 2, varList.at(i).name);
+                  replaceSuccess = true;
+                }
               }
             }
+            else if (hiveType == "COMB") {
+              for (int i = 0; i < sizeof(pVar); i++) {
+                if (pVar[i].name == tempVariable) {
+                  debug("Matching variable is " + pVar[i].name);
+                  replaceSuccess = true;
+                  interpret.replace(interpret.find("</"), tempVariable.length() + 2, pVar[i].contents);
+                }
+              }
+            }
+            else if (hiveType == "CELL") {
+              debug("var.contents is " + var.contents);
+              debug("var.name is " + var.name);
+              if (var.name == tempVariable) {
+                debug("Matching variable is " + var.contents);
+                replaceSuccess = true;
+                interpret.replace(interpret.find("</"), var.name.length() + 2, var.contents);
+              }
+              else {
+                debug("Unsuccessful cell attempt in string variable reference");
+              }
+            }
+            if (replaceSuccess == false) {
+              WARN "Ignoring instance of 'Unknown variable mentioned.'" ENDL;
+              std::cout << interpret << std::endl;
+              return 0;
+            }
+            else {
+              debug("Replace successful with " + interpret + "!");
+            }
           }
-        }
-        else {
-          ERR "No string detected." ENDL;
-        }
       }
-      std::cout << interpret << std::endl;
+      if (fileWrite == false) {
+        std::cout << interpret << std::endl;
+      }
       return 0;
     }
-    if (varCheck.substr(0, 3) == "BUZZ") {
+    if (varCheck.substr(0, 4) == "BUZZ" && interpret.find("BUZZ") != std::string::npos) {
+      debug("Detecting variable or function declaration.");
       commandRecognized = true;
-      varCheck.erase(0, 3);
+      varCheck.erase(0, 4);
+      interpret.erase(0, 4);
       if (varCheck.find("(") != std::string::npos) {
-        std::string funcName = interpret.substr(0, varCheck.find("("));
+        std::string funcName = interpret.substr(0, varCheck.find("(") - 1);
         if (varCheck.find(',') != std::string::npos) {
           int secondVarCheckFind;
           int varCheckFindI = 1;
@@ -275,7 +339,7 @@ int process(std::string interpret) {
           	function uFunc(funcName, functionArgs);
 	        }
           else if (hiveType == "COMB") {
-            combUp();
+            combUp("function");
             pFunc[currentFuncDef].name = funcName;
             for (int i = 0; i < functionArgs.size(); i++) {
               pFunc[currentFuncDef].args.push_back(functionArgs.at(i));
@@ -286,7 +350,11 @@ int process(std::string interpret) {
           int commaF = varCheck.find(',');
 	        if (hiveType == "CELL") {
           	function uFunc(funcName);
-	          } 
+	          }
+          else if (hiveType == "COMB") {
+            combUp("function");
+            pFunc[currentFuncDef].name = funcName;
+          } 
         }
         if (varCheck.back() == '{') {
           inFunction = true;
@@ -296,15 +364,41 @@ int process(std::string interpret) {
           	uFunc.contents = interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1);
           }
 	        else if (hiveType == "COMB") {
-            combUp();
-            pFunc[currentFuncDef] = interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1);
+            combUp("function");
+            pFunc[currentFuncDef].contents = interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1);
           }
-        else {
+        else if (interpret.find('{') == std::string::npos) {
           WARN "Function declared without curly brackets." ENDL;
+        }
+        else {
+          ERR "Unknown error." ENDL;
         }  
       }
-      return 0;
     }
+    else {
+      debug("Detecting variable declaration.");
+      std::string varName = varCheck.substr(0, varCheck.find("="));
+      if (varName == "STR:") {
+        ERR "Variable name cannot be data type!" ENDL;
+        return 0;
+      }
+      varCheck = varCheck.substr(varCheck.find("=") + 1, varCheck.length() - 1);
+      if (varCheck.substr(0, 4) == "STR:" && interpret.find("STR:") != std::string::npos) {
+        debug("Detecting string declaration.");
+        interpret = interpret.substr(interpret.find("\"") + 1, std::distance(interpret.begin(), boost::find_nth(interpret, "\"", 2).begin()));
+        interpret.erase(interpret.length() - 1);
+        if (hiveType == "CELL") {
+          var.name = varName;
+          var.contents = interpret;
+        }
+        else if (hiveType == "COMB") {
+          combUp("var");
+          pVar[currentVarDef].name = varName;
+          pVar[currentVarDef].contents = interpret;
+        }
+      }
+    }
+    return 0;
   }
   if (interpret.find("}") != std::string::npos) {
     if (inFunction) {
@@ -314,7 +408,7 @@ int process(std::string interpret) {
       WARN "Ignoring '}' character." ENDL;
     }
   }
-  if (varCheck.find(":(") != std::string::npos) {
+  if (interpret.find(":(") != std::string::npos) {
     debug("Inside bee body");
     if (!connectionStart) {
       ERR "Cannot start connection without wings." ENDL;
