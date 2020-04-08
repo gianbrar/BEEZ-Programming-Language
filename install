@@ -5,6 +5,9 @@ if [ $EUID -ne 0 ]
   exit
 fi
 
+trap '' 2
+
+echo 'For the purpose of ensuring that no part of the installation is corrupted, CTRL+C has been (temporarily) disabled.'
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
   echo 'Detecting operating system as Linux.'
   cd src/b++
@@ -17,4 +20,5 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
   # MAC OS CODE HERE
 fi
 
+trap 2
 echo "Install successful!"
