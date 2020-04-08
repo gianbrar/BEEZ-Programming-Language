@@ -312,7 +312,7 @@ int process(std::string interpret) {
       commandRecognized = true;
       varCheck.erase(0, 4);
       interpret.erase(0, 4);
-      if (varCheck.find("(") != std::string::npos) {
+      if (varCheck.find("(") != std::string::npos && varCheck.find("{") != std::string::npos) {
         std::string funcName = interpret.substr(0, varCheck.find("(") - 1);
         if (varCheck.find(',') != std::string::npos) {
           int secondVarCheckFind;
