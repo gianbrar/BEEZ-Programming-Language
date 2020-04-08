@@ -18,4 +18,7 @@ class variable {
   public:
     std::string name;
     std::string contents;
+    variable(std::string argName, std::string argContents) : name(argName), contents(argContents) {}
+    variable(std::string argName) : name(argName) {}
+    variable () {}
 };
