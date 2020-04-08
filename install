@@ -6,8 +6,15 @@ if [ $EUID -ne 0 ]
 fi
 
 trap '' 2
-
 echo 'For the purpose of ensuring that no part of the installation is corrupted, CTRL+C has been (temporarily) disabled.'
+if [[ "$@" == "-d" ]] || [[ "$@" == "--debug" ]]; then
+	echo "Debug mode detected!"
+	cd src/b++
+	g++ -o b++ main.cpp
+	mv b++ /usr/bin
+	alias b++=/usr/bin/b++
+	exit
+fi
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
   echo 'Detecting operating system as Linux.'
   cd src/b++
