@@ -111,6 +111,7 @@ int charCheck() {
   return 0;
 }
 
+
 int createHive() {
   hive = true;
   hiveType = fValue.substr(1, fValue.length() - 1);
@@ -196,6 +197,15 @@ int process(std::string interpret) {
        }
        return 0;
     }
+    if (inFunction && interpret.find("}") == std::string::npos) {
+      if (hiveType == "CELL") {
+        uFunc.contents.push_back(interpret);
+      }
+      else if (hiveType == "COMB") {
+        pFunc[currentFuncDef].contents.push_back(interpret);
+      }
+      return 0;
+    }
     std::string varCheck = removeCS(interpret, 'C');
     if (debugMode == true) {
 	    std::cout << "Successfully removed all comments." ENDL;
@@ -239,7 +249,7 @@ int process(std::string interpret) {
       return 0;
     }
     bool fileWrite = false;
-    if (interpret.find("BUZZ@") != std::string::npos) {
+    if (varCheck.substr(0, 5) == "BUZZ@") {
       debug("Detecting BUZZ@");
       interpret = interpret.substr(interpret.find("BUZZ@") + 5, interpret.length() - 1);
       if (interpret.substr(0, 7) == "console") {
@@ -313,7 +323,8 @@ int process(std::string interpret) {
       varCheck.erase(0, 4);
       interpret.erase(0, 4);
       if (varCheck.find("(") != std::string::npos && varCheck.find("{") != std::string::npos) {
-        std::string funcName = interpret.substr(0, varCheck.find("(") - 1);
+        debug("Detecting function declaration.");
+        std::string funcName = varCheck.substr(0, varCheck.find("("));
         if (varCheck.find(',') != std::string::npos) {
           int secondVarCheckFind;
           int varCheckFindI = 1;
@@ -363,11 +374,11 @@ int process(std::string interpret) {
         }
         else if (varCheck.back() == '}') {
 	        if (hiveType == "CELL") {
-          	uFunc.contents = interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1);
+          	uFunc.contents.push_back(interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1));
           }
 	        else if (hiveType == "COMB") {
             combUp("function");
-            pFunc[currentFuncDef].contents = interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1);
+            pFunc[currentFuncDef].contents.push_back(interpret.substr(interpret.find('{') + 1, interpret.find('}') - 1));
           }
         else if (interpret.find('{') == std::string::npos) {
           WARN "Function declared without curly brackets." ENDL;
@@ -402,14 +413,6 @@ int process(std::string interpret) {
     }
     return 0;
   }
-  if (interpret.find("}") != std::string::npos) {
-    if (inFunction) {
-      inFunction = false;
-    }
-    else {
-      WARN "Ignoring '}' character." ENDL;
-    }
-  }
   if (interpret.find(":(") != std::string::npos) {
     debug("Inside bee body");
     if (!connectionStart) {
@@ -433,7 +436,7 @@ int process(std::string interpret) {
     }
     return 0;
   }
-  if (interpret.find("(") != std::string::npos) {
+  if (varCheck.at(0) == '(') {
     if (interpret.find(")") != std::string::npos) {
       if (connectionStart && !bodyDefined) {
         ERR "Cannot define connection inside connection. You just smashed two bees into each other. You monster." ENDL;
@@ -469,9 +472,20 @@ int process(std::string interpret) {
         return 0;
     }  
   }
+  debug("Cannot recognize command; attempting to see if function calling is true or if function declaration is being ended.");
   if (hiveType == "CELL") {
-    if (varCheck.find(uFunc.name + "(") != std::string::npos && varCheck.find(")") != std::string::npos) {
-      process(uFunc.contents);
+    if (varCheck.find(uFunc.name) != std::string::npos && varCheck.find(uFunc.name + "(") != std::string::npos && varCheck.find(")") != std::string::npos) {
+      for (int i = 0; i < uFunc.contents.size(); i++) {
+        process(uFunc.contents.at(i));
+      }
+    }
+  }
+  if (interpret.find("}") != std::string::npos) {
+    if (inFunction) {
+      inFunction = false;
+    }
+    else {
+      WARN "Ignoring '}' character." ENDL;
     }
   }
   return 0;
@@ -488,7 +502,7 @@ int main(int argc, char** argv) {
       }
     }
   else {
-      ERR "No input files given." ENDL;
+      ERR "No input files or commands given.\nTry: b++ -m\nor\nb++ --man\nfor help." ENDL;
       return 0;
   }
   std::string argv1;
