@@ -4,7 +4,7 @@ class function {
   public:
     std::vector<std::string> args;
     std::string name;
-    std::string contents;
+    std::vector<std::string> contents;
     function(std::string arrayFuncName, std::vector<std::string> givenArgs) : name(arrayFuncName) {
       for (int i = 0; i < givenArgs.size(); i++) {
         args.push_back(givenArgs.at(i));
