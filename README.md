@@ -17,7 +17,7 @@ COMB: A version of the CELL type which allows for a predefined number of variabl
 ```
 Above declares a comb hive with 4 variables, 4 functions, and 4 loops. This exact amount must be met.
 
-AMORTIZED COMB: A version of the COMB type that allows any number of functions and loops such as that they fall under its mathematic function for variables as seen here: 
+AMORTIZED COMB (not yet supported): A version of the COMB type that allows any number of functions and loops such as that they fall under its mathematic function for variables as seen here: 
 
 ![Amortization Formula](https://cdn.educba.com/academy/wp-content/uploads/2019/01/Amortization-Formula-1.png)
 
@@ -40,4 +40,4 @@ The absolute value of the formula is always taken in this instance.
 ^AMORTIZED > 3 < 9 >
 ```
 Above declares an amortized comb hive with a max of 3 functions, a max of 9 loops, and 0.17669334445, rounded to 0 variables.
-It is not recommended that amortized hives are used. Ever. They are incredibly stupid and vector hives are far more practical.
+It is not recommended that amortized hives are used. Ever. They are incredibly stupid and vector hives are far more practical
