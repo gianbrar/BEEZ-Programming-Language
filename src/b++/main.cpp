@@ -248,14 +248,18 @@ int process(std::string interpret) {
       }
       return 0;
     }
-    bool fileWrite = false;
     if (varCheck.substr(0, 5) == "BUZZ@") {
       debug("Detecting BUZZ@");
       interpret = interpret.substr(interpret.find("BUZZ@") + 5, interpret.length() - 1);
-      if (interpret.substr(0, 7) == "console") {
+      std::string writeTo = interpret.substr(0, interpret.find(" "));
+      if (writeTo == "console") {
         debug("Sending message to console");
         interpret.erase(0, 8);
         varCheck.erase(0, 12);
+      }
+      else {
+        interpret = interpret.substr(interpret.find(" "), interpret.length() - 1);
+        varCheck = varCheck.erase(0, varCheck.find("\""));
       }
       if (varCheck.at(0) == '"') {
           debug("Found string");
@@ -312,8 +316,36 @@ int process(std::string interpret) {
             }
           }
       }
-      if (fileWrite == false) {
-        std::cout << interpret << std::endl;
+      std::ofstream buzzAtOut;
+      if (writeTo != "console") {
+        buzzAtOut.open(writeTo.c_str());
+      }
+      for (int i = 0; i < interpret.size(); i++) {
+        if (interpret.at(i) == '\\' && interpret.at(i + 1) == 'n') {
+          interpret.erase(i, 1);
+          if (writeTo == "console") {
+            std::cout << std::endl;
+          }
+          else {
+            buzzAtOut << std::endl;
+          }
+        }
+        else {
+          if (writeTo == "console") {
+            std::cout << interpret.at(i);
+          }
+          else {
+            buzzAtOut << interpret.at(i);
+          }
+        }
+        if (i == interpret.size() - 1) {
+          if (writeTo != "console") {
+            buzzAtOut.close();
+          }
+          else {
+            std::cout << std::endl;
+          }
+        }
       }
       return 0;
     }
